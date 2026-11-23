@@ -1,0 +1,56 @@
+https://github.com/msitarzewski/agency-agents
+
+**结论：是一个“AI 代理公司”提示词库（Prompt 集合） ——主体是 150 多个 Markdown 文件，代码只占很小的安装脚本部分。**
+
+**一句话定位 ：一个“数字代理公司”的 AI Agent 人格库——用 150 多个精写的 Markdown 文件，把一整个软件/营销代理公司的专家团队（工程师、设计师、安全专家、营销专家……）做成可以装进 AI 编码工具的“专家人格提示词”。**
+- 每个 agent 是一个`.md` 文件，包含：身份与性格、核心使命与工作流、技术交付物（含代码示例）、成功指标和沟通风格
+- 不是通用模板提示词 ，而是“人格驱动 + 交付导向”的深度角色定义。
+
+**怎么使用？**
+# 方式一：桌面 App（推荐，免命令行）
+brew install --cask msitarzewski/agency-agents/agency-agents
+
+# 方式二：脚本安装到指定工具（可选部门/单个 agent）
+./scripts/install.sh --tool cursor --agent frontend-developer,ui-designer
+
+# 方式三：直接把 .md 当提示词参考复制
+
+
+**核心思想一句话** ：平时 AI 助手是“通用实习生”；装上这些 agent 后，你可以让它随时“变身”为某个资深专家，按那套专家的方法论、检查清单和交付标准来干活。
+
+你遇到的情境	                   激活的 Agent	                                它带来什么
+- 接手不熟悉的专业领域（支付、智能合约、嵌入式、网络设备…）	   Payments & Billing Engineer、Solidity Engineer 等	   直接给到该领域的最佳实践，而不是通用答案
+- 要“专家级”交付，而不只是能跑的代码	    Frontend Developer（Core Web Vitals、组件库思维）、SRE（SLO/错误预算）	   方法论 + 成功指标，代码质量明显高一档
+- 接手陌生代码库	    Codebase Onboarding Engineer	   只读探索、按结构讲解，快速摸清 repo
+- 项目要上线/发布前把关	    Code Reviewer、Reality Checker、UI Finish-Gate Reviewer	      独立“第二意见”，按清单出审查报告
+- AI 帮你vibe coding 出来的代码不放心	     AI-Generated Code Security Auditor    	专扫硬编码密钥、坏的 RLS、注入漏洞
+- 数据库变慢、查询拖垮服务	       Database Optimizer	        索引策略、慢查询诊断、迁移方案
+- 复杂项目要“组队”开工	runbook       预设阵容（如 startup-mvp）	   一键装一整套前后端+DevOps+设计的团队
+
+不适用的场景：改一行小 bug、格式微调这类小活——直接问 AI 更快，没必要“变身”。
+
+
+**操作步骤：
+- 安装：按需选量，别全装
+# 只装工程 + 安全部门
+./scripts/install.sh --tool claude-code --division engineering,security
+# 只装几个常用的（按名字或 slug）
+./scripts/install.sh --tool cursor --agent frontend-developer,database-optimizer
+
+- 会话里显式激活（不激活就还是普通助手）
+“激活数据库优化专家模式，帮我诊断这条慢查询并给出索引方案”
+
+- 按它的交付标准验收
+每个 agent 自带成功指标和工作流，可以直接要求它按 checklist 输出。
+
+
+### 实际的建议
+这些 agent 本质就是 精心写的 Markdown 人格提示词 。你不需要装任何东西：
+- 把某个 agent 的`.md` 内容直接粘贴到任何 AI 对话框（包括你现在用的 Trae）就能用
+- 更推荐的做法：挑 2-3 个对你业务最相关的（比如前端 + 代码审查 + 安全审计），把内容改编成你自己的规则文件/常驻系统提示词
+- 项目里 Chinese 生态相关 agent 不少（飞书集成、微信小程序、抖音运营），如果你的工作涉及国内平台，这部分可以直接拿来参考
+简单说： 日常小活直接问；专业域任务、要方法论和把关的场景，让它变身专家。
+
+
+
+
