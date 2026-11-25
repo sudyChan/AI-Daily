@@ -1,0 +1,92 @@
+https://github.com/anthropics/skills
+
+
+
+## 项目分析：anthropics/skills
+
+**一句话定位**：Anthropic 官方的 **Agent Skills 参考实现与教学仓库**——既是 Claude 技能系统的"官方示例库 + 标准文档"，也是开源版的文档处理技能（Claude.ai 创建文件功能的底层实现）。它是整个 skills 生态的"源头规范"。
+
+- 基本信息：2025 年 9 月创建（生态里最早的），约 **199.5K stars / 23.3K forks**，Apache 2.0（大部分），topic 为 `agent-skills`
+- 语言统计以 Python 为主——因为技能里带大量**可执行脚本**（如 docx/pdf/pptx/xlsx 处理用 python-docx、openpyxl 之类），这也是它和纯 Markdown 提示词库的本质区别
+- 开篇第一句就强调：**Agent Skills 的开放标准在 [agentskills.io](https://agentskills.io)**（即 `./spec` 目录），本仓库是 Anthropic 的实现
+
+### 仓库三大板块
+
+| 目录 | 内容 | 性质 |
+|---|---|---|
+| `./skills` | 官方技能示例：创意/设计（art、music、design）、开发/技术（web app 测试、MCP server 生成）、企业/沟通（品牌规范、公文写作）、**文档技能** | 可直接用 + 学习范本 |
+| `./spec` | Agent Skills 开放规范（SKILL.md 格式、frontmatter、发现机制） | 标准文档 |
+| `./template` | 技能模板（`name` + `description` 两个必填字段 + 指令正文） | 起步脚手架 |
+
+### 重点：document-skills 是"生产级"的
+
+`skills/docx`、`pdf`、`pptx`、`xlsx` 这四个是 **Claude.ai "创建文件"功能背后真实的生产实现**（Anthropic 官方博客 Announcing Create Files 点名），已开源。它们示范了复杂技能的完整形态：
+
+> SKILL.md（指令 + 元数据） + 辅助脚本（真正干活的 Python 代码） + 资源文件（模板/参考）
+
+你现在看到我在 Trae 里用的 office-plugin（docx/pdf/pptx/xlsx 技能），其设计源头就是这套东西。
+
+### 和前面三个项目的关系（终于拼完整了）
+
+| 项目 | 角色 | 类比 |
+|---|---|---|
+| **anthropics/skills** | 技能**标准 + 官方示例**（含生产级文档技能） | W3C 规范 + 官方参考实现 |
+| vercel-labs/skills | 技能**安装/管理 CLI**（`npx skills`） | npm 客户端 |
+| mattpocock/skills | 社区**工程流程**技能集 | 优质第三方包 |
+| agency-agents | 社区**专家人格**提示词集 | 角色扩展包 |
+
+### 你作为开发人员，怎么用
+
+**1. 直接用官方技能（三个入口）**
+
+```bash
+# Claude Code：注册为插件市场
+/plugin marketplace add anthropics/skills
+/plugin install document-skills@anthropic-agent-skills   # 文档四件套
+/plugin install example-skills@anthropic-agent-skills    # 示例技能
+```
+
+- **Claude.ai**（付费版）：这些示例技能已经内置，在设置里上传自定义技能即可
+- **Claude API**：通过 Skills API 上传/使用预置技能（docs.claude.com 的 skills-guide）
+- **其他 agent**：同样可用 `npx skills add anthropics/skills` 装（标准是通用的）
+
+装完直接自然语言调用："用 PDF 技能提取 `path/to/file.pdf` 里的表单字段"。
+
+**2. 学习写自己的技能（这个仓库最大的价值）**
+
+技能 = 一个文件夹 + `SKILL.md`：
+
+```markdown
+---
+name: my-skill-name
+description: 干什么、什么时候用（这是 Claude 决定是否加载的唯一依据）
+---
+
+# 指令正文：步骤、示例、规范
+```
+
+- 想写简单的：抄 `./template` 起步
+- 想写带脚本的复杂技能：**精读 `skills/docx` 或 `skills/pdf`**——这是你能找到的最好的"生产级 SKILL.md 范本"，比任何教程都实在
+
+**3. 典型使用场景**
+
+| 场景 | 用法 |
+|---|---|
+| 要让 agent 批量处理 Word/Excel/PPT/PDF | 装 document-skills |
+| 给团队沉淀"公司品牌规范 / 公文格式 / 数据分析流程"为可复用技能 | 学习 example-skills 的模式，写自定义 skill |
+| 给自己的产品/库配 agent 使用说明 | 学 `spec` 规范 + 模板，产出 SKILL.md 随库分发（配合 `experimental_sync`） |
+| 想搞懂 skills 到底是什么机制 | 读 `./spec` + 那篇官方博客《Equipping agents for the real world with Agent Skills》 |
+
+### 注意事项
+
+- README 明确 **Disclaimer**：这些技能是演示/教育性质，Claude 实际内置行为可能有差异，**关键任务务必自己测试**
+- 文档技能依赖 Python 脚本环境，装到 agent 里时注意运行环境（依赖安装、沙箱权限）
+- 仓库 license 字段显示 null 是因为多目录组合（文档技能 Apache 2.0，个别示例另有说明），商用前按目录核对
+
+### 小结
+
+如果你只想**用**技能 → 装 `document-skills` 四件套最实用；
+如果你要**写**技能 → 这个仓库的 `spec` + `template` + `skills/docx` 是权威教材；
+如果你要**分发**技能 → 用 vercel-labs 的 `npx skills` 作管道。三件事分别对应生态的三个环节，这也解释了为什么这四个仓库要一起看才完整。
+
+来源：[anthropics/skills](https://github.com/anthropics/skills) · [GitHub API 元数据](https://api.github.com/repos/anthropics/skills) · [Agent Skills 标准](https://agentskills.io)
