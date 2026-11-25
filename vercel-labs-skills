@@ -1,0 +1,87 @@
+## 项目分析：vercel-labs/skills
+
+**一句话定位**：这**不是一个技能集合，而是 Agent Skills 生态的“包管理器”**——一个叫 `skills` 的 npm CLI 工具（`npx skills`），用来把任意仓库里的 SKILL.md 安装、更新、锁定到你的编码 agent 里。类比：它是技能世界的 **npm / pip**，[skills.sh](https://skills.sh) 是 npmjs.com。
+
+- 基本信息：Vercel Labs 出品，2026 年 1 月创建，约 **40.8K stars / 3.6K forks**，MIT，TypeScript 写的（这次是真代码项目，约 165 万字节 TS）
+- 需要 Node.js **22.20+**；支持 OpenCode、Claude Code、Codex、Cursor **及另外 75+ 个 agent**
+- 你上一个项目里我给的那条 `npx skills@latest add mattpocock/skills -a cursor`，用的就是这个工具
+
+### 先厘清生态里的几个"skills"
+
+很多人会把它们混在一起，其实是四样东西：
+
+| 项目/站点 | 本质 | 类比 |
+|---|---|---|
+| **vercel-labs/skills**（本仓库） | CLI 工具，`npx skills` | npm 客户端 |
+| skills.sh | 技能目录/注册表 | npmjs.com |
+| vercel-labs/agent-skills | Vercel 自己出的技能集（如 `web-design-guidelines`、Next.js/React 最佳实践等） | 官方包 |
+| mattpocock/skills | Matt Pocock 的工程流程技能集 | 社区优质包 |
+| agency-agents | 专家人格提示词库 | 角色包 |
+
+后三者都通过前者安装。
+
+### 核心能力
+
+| 命令 | 作用 |
+|---|---|
+| `npx skills add <owner/repo>` | 安装（交互式选 skill 和 agent，默认装到当前项目，`-g` 全局） |
+| `npx skills find [query]` | 在注册表里搜索技能 |
+| `npx skills use <repo>@<skill>` | **不安装试用**：直接打印 prompt，或用指定 agent 启动 |
+| `npx skills list / check / update / remove` | 已装列表 / 检查更新 / 更新 / 卸载 |
+| `npx skills init my-skill` | 生成 SKILL.md 模板，创建你自己的技能 |
+| `npx skills install --frozen-lockfile` | 按 `skills-lock.json` 精确还原（团队/CI 复现） |
+
+两个值得注意的设计：
+
+- **`skills-lock.json`（v2）**：每个技能记录来源 **commit SHA + 内容哈希**，队友和 CI 还原时拿到的就是你验证过的那一版，上游改了也不漂移
+- **`experimental_sync`**：npm 包可以在 `package.json` 里声明自带技能，用户 `npm install` 你的库时，agent 顺带学会怎么用它——这是给**库作者**的分发渠道
+
+### 你作为开发人员，什么时候用
+
+| 场景 | 用法 |
+|---|---|
+| 想给 Claude Code / Cursor / Codex 装某个 GitHub 仓库的技能 | `npx skills add owner/repo` |
+| 同时用多个 agent，想一份技能到处用 | 装到 `.agents/skills/`，对接到各 agent 的目录，不用每个平台各装一遍 |
+| 团队协作 / CI，要求大家用同一版技能 | 提交 `skills-lock.json`，CI 里 `install --frozen-lockfile` |
+| 只想看某个技能的 prompt 内容、不想污染项目 | `npx skills use ... `（不带 `--agent` 直接打印） |
+| 想沉淀自己的技能并分享 | `npx skills init` → 写 SKILL.md → 推到 GitHub，别人就能 `add` |
+| 你是开源库作者，想让用户的 agent 懂你的库 | 在 npm 包里捆绑技能，`experimental_sync` |
+
+### 怎么上手
+
+```bash
+# 1. 装一个技能集（会问你选哪些 skill、装到哪些 agent）
+npx skills add vercel-labs/agent-skills
+
+# 只装一个技能到一个 agent
+npx skills add vercel-labs/agent-skills --skill web-design-guidelines -a claude-code
+
+# 2. 先试试不装
+npx skills use vercel-labs/agent-skills@web-design-guidelines
+
+# 3. 日常维护
+npx skills list
+npx skills check
+npx skills update
+
+# 4. 团队复现
+npx skills install --frozen-lockfile
+```
+
+如果你的 agent 不在 75+ 支持列表里（列表见 `docs/agents.md`），退路是 `npx skills use` 打印 prompt，或直接把安装目录里的 `SKILL.md` 内容喂给它。
+
+### 什么时候不用 / 注意
+
+- **只用一个 agent、且用它原生的插件系统就够了**（如 Claude Code 的 `claude plugin install`）——可以不经过这个 CLI
+- 只是临时看一个技能内容，手动复制 SKILL.md 更快
+- 默认有**匿名遥测**，可用 `DISABLE_TELEMETRY=1` 或 `DO_NOT_TRACK=1` 关掉
+- 实验性命令（`experimental_*`）随时可能变，生产环境慎依赖
+
+### 三个项目串起来
+
+**agency-agents** 给 agent *专家人格*，**mattpocock/skills** 给 agent *工程纪律*，两者都是"技能内容"；
+                                                                                                                                                                        
+而 **vercel-labs/skills** 是把它们*装进任何 agent* 的那条管道。实际工作流通常是：
+用 `npx skills` 装上后两者 → 在 Claude Code/Cursor 里按 Matt 的流程（grill → spec → tickets → implement）干活，需要专业领域时切换 agency 的人格。
+
+来源：[vercel-labs/skills](https://github.com/vercel-labs/skills) · [GitHub API 元数据](https://api.github.com/repos/vercel-labs/skills)
