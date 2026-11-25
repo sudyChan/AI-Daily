@@ -1,0 +1,63 @@
+https://github.com/Tracer-Cloud/opensre
+
+
+## 项目分析：Tracer-Cloud/opensre
+
+**一句话定位**：一个**开源的"CI/CD 可靠性 + 生产事故排查"AI Agent**——CI 挂了，它自动读日志、追根因、推修复补丁给你 review；生产出事故，它连上你的监控栈（K8s、Grafana、Datadog…）做证据链式排查。和前面几个"提示词/技能包"完全不同，**这是一个真跑的完整产品**（Python 代码库）。
+
+- 基本信息：2026 年 1 月创建（Tracer-Cloud 公司出品，Greptile 赞助），约 **14.8K stars / 2K forks**，Apache 2.0，**Public Alpha**（能用但不保证稳定），主打 Python
+- 痛点自述很准："AI 每个月写的代码越来越多，但**构建挂了还是得有人修**。CI 只告诉你红了，不告诉你为什么、怎么修。"
+- 卖点：**自托管、用自己的模型**（Anthropic/OpenAI/Ollama/Bedrock/Gemini 等 9 家 LLM 可选），可选敏感信息脱敏后才出网
+
+### 它干什么
+
+**场景一：CI 红了**
+1. 拉取上下文：失败的 check、CI 日志、最近 commit/部署、关联的日志/指标/trace
+2. （可选）脱敏敏感标识
+3. 工具调用循环里**验证假设**，区分"CI 环境问题" vs "代码问题"（这是它的核心差异化——修对东西，而不是盲目重跑）
+4. 给出带证据链的结论
+5. **直接推修复到 PR 分支**给你 review
+6. 摘要发到 Slack / PagerDuty / Telegram
+
+**场景二：生产事故** —— 把 EKS/EC2/CloudWatch/K8s/Grafana(Loki/PromQL/Tempo)/Alertmanager/Datadog/Slack 连上，用大白话描述事故或直接接告警路由，它自己挑工具查日志/指标/pod 状态/部署历史。
+
+**附带能力**：CI 可靠性度量（失败率、浪费的开发工时、`main` 变红时长）；60+ 集成（含 GitHub/GitLab/Jenkins、Postgres/Redis/Snowflake、PagerDuty/Jira、MCP 协议）。
+
+### 你作为开发人员，怎么用
+
+**三种使用面**（按需选）：
+
+```bash
+# 安装（Windows PowerShell 也有一行式）
+& ([scriptblock]::Create((irm https://install.opensre.com/install.ps1))) -gh
+
+# 1. 交互式 REPL：描述事故/问题，看它干活，/help /status /cost /resume 等斜杠命令
+opensre
+
+# 2. 无头 CLI：脚本/CI 里跑一轮，支持 JSON 输出
+opensre ask "why is checkout-api slow?"
+
+# 3. Python API：嵌进你自己的服务/自动化
+from surfaces.embedded import start_embedded_session
+session = start_embedded_session()
+result = session.chat("why is checkout-api slow?")
+```
+
+配好集成后典型的一天：
+
+| 你的场景 | 用法 |
+|---|---|
+| PR 的 CI 挂了不想手动翻日志 | 让它读失败 run → 定位 → 推修复到 PR 分支 |
+| flaky test 堆积、`main` 常红 | 跑它的 CI 可靠性分析，量化浪费 + 逐个修根因 |
+| 值班被叫醒，线上故障 | 把告警路由给它（Slack/PagerDuty/Telegram），它查完把证据链结论发回群里 |
+| 团队要统一"事故响应"流程 | Python API 嵌进内部工具，让每个工程师拿到资深级排查深度 |
+
+**部署**：OpenSRE Cloud 托管网关（网页端开通）/ AWS AMI + systemd 网关 / 自托管容器（Railway、ECS、Vercel，设 `MODE` + `LLM_PROVIDER`）。
+
+### 什么时候用 / 注意
+
+**非常适合**：CI 频繁红、团队被不稳定流水线吃掉大量时间；有值班/告警压力、事故排查依赖个别资深工程师；数据敏感、想自托管 + 本地模型（Ollama）。
+
+**暂时别上生产关键路径**：Public Alpha，API 和集成还在变；遥测默认开启（`OPENSRE_NO_TELEMETRY=1` 关闭）；首次启动要注册账号登录。贡献者可以从 `main.py` 入口图 + `good first issue` 上手。
+
+OpenSRE 是另一条线——**运维/SRE 领域的专职 agent 产品**，独立运行在 CI 和监控栈上，不依附于你的 IDE。两者互补：写代码阶段用 skills 生态，代码进了流水线、线上之后由 OpenSRE 这类"可靠性 agent"接棒。
