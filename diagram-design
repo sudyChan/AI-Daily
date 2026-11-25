@@ -1,0 +1,61 @@
+https://github.com/cathrynlavery/diagram-design
+
+
+
+## 项目分析：cathrynlavery/diagram-design
+
+**一句话定位**：一个专门让 AI 编码 agent **画"设计师能看"的高质量图表**的技能包（Agent Skill）——输出单个自包含的 HTML + SVG 文件，支持套用你的品牌配色/字体。口号很直白：**"No shadows. No Mermaid slop."**（不要阴影，不要 Mermaid 味的烂图）。
+
+- 基本信息：2026 年 4 月创建，约 **70K stars / 4.7K forks**，MIT，主体是 HTML + SVG 模板/示例（技能本身是 SKILL.md + 脚本 + 模板）
+- 作者 Cathryn Lavery（LittleMight 公司），官网 [diagramdesign.dev](https://diagramdesign.dev)，有在线画廊看 52 种图的效果
+- 支持面很广：Claude Code、Cursor、Codex、Copilot、Qoder、Gemini CLI、Windsurf、Zed、Warp、Pi、Kiro、OpenCode 等（正好用上一个项目说的 `npx skills` 管道）
+
+### 它解决什么问题
+
+AI 默认画图基本 = Mermaid/PlantUML，丑、不能进正式文档、不能贴合品牌。这个技能把"画图"变成一个**有设计规范约束的产出物**：
+
+| 能力 | 说明 |
+|---|---|
+| 52 种图表类型 | 架构图、时序图、四象限（影响×投入）、流程图、数据可视化等，agent 自动选型并说明计划 |
+| 输出形式 | **单个 `.html` 文件**（内嵌 SVG），双击即开，可直接嵌入文档/网页 |
+| 品牌一致性 | "Onboard diagram-design 到你的网站"——自动抓取你站点的配色和字体，之后每张图都匹配 |
+| 导入 | 把已有的 drawio / Mermaid / Excalidraw / PlantUML 图**重新画成好看版** |
+| 导出 | `/export-diagram` 导出 PNG / SVG |
+| 配套命令 | `/profile`（品牌档案）、`/doctor`（环境检查）、`/import-mermaid` 等 |
+
+### 你作为开发人员，怎么用
+
+**安装**（一行，任选宿主）：
+
+```bash
+# 通用（Cursor / Windsurf / Gemini CLI / Zed 等）
+npx skills add cathrynlavery/diagram-design
+
+# Claude Code（有插件市场 + 自动更新 + 斜杠命令）
+/plugin marketplace add cathrynlavery/diagram-design
+/plugin install diagram-design@diagram-design
+```
+
+**用法就是自然语言说话**：
+
+- "给我的应用画一张架构图：前端、后端、数据库、Redis 缓存"
+- "来一张 Q2 项目按影响 × 投入的四象限图"
+- "画一个带 401 刷新 token 的 Bearer 认证时序图"
+- "把这个 Mermaid 图重新画一下"（走 `/import-mermaid`）
+- "Onboard 到 https://yoursite.com"（让之后所有图套用你的品牌）
+
+agent 会选型 → 说计划 → 生成一个 `.html` 文件。
+
+### 什么时候用 / 不用
+
+**非常适合**：
+- 技术方案评审、架构文档、README/博客配图、对外分享的 slides 素材——需要"拿得出手"的图
+- 团队/公司有品牌规范，图要和官网、产品文档视觉统一
+- 老的 Mermaid/drawio 图要升级成正式文档级配图
+- PR 描述、事故复盘、RFC 里的结构图
+
+**不太需要**：
+- 随手画个草图给自己看——Mermaid 够了，还更快
+- 需要可编辑协作的在线白板场景（它产出的是静态 HTML 文件，不是 Figma 类工具）
+
+**注意**：`npx skills add` 装的是独立副本，不自动跟随更新，要 `npx skills update diagram-design`；想要自动更新走各家的插件市场（README 里每家的命令都列了）。Windows 无开发者模式时 symlink 不可用会回退为复制。
